@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import "./App.css";
 
 const API = "http://localhost:3000/api";
 
@@ -282,72 +283,56 @@ function App() {
   const getLabel = (field) => FIELD_LABELS[field] || field;
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial", background: "#f9fafb", minHeight: "100vh" }}>
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        <h1 style={{ color: "#4f46e5", textAlign: "center", marginBottom: "24px", fontSize: "2rem" }}>
-          Sistema de Ventas - Con Validaciones
-        </h1>
+    <div className="app-container">
+      <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+        <header className="app-header">
+          <h1 className="app-title">Sistema de Ventas</h1>
+          <p className="app-subtitle">Backend: Node.js + Express | Frontend: React + Vite</p>
+        </header>
 
-        <div style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap", justifyContent: "center" }}>
+        <div className="tabs-container">
           {entities.map(e => (
             <button
               key={e.key}
               onClick={() => { setActiveTab(e.key); setForm({}); setErrors({}); }}
-              style={{
-                padding: "10px 16px",
-                background: activeTab === e.key ? "#4f46e5" : "#e5e7eb",
-                color: activeTab === e.key ? "white" : "#1f2937",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
+              className={`tab-button ${activeTab === e.key ? 'active' : 'inactive'}`}
             >
               {e.name}
             </button>
           ))}
         </div>
 
-        <input
-          type="text"
-          placeholder="Buscar..."
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1); }}
-          style={{
-            width: "100%",
-            maxWidth: "400px",
-            padding: "12px",
-            marginBottom: "20px",
-            borderRadius: "8px",
-            border: "1px solid #d1d5db",
-            fontSize: "1rem",
-            display: "block",
-            margin: "0 auto 20px"
-          }}
-        />
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="🔎 Buscar en registros..."
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1); }}
+            className="search-input"
+          />
+        </div>
 
-        <div style={{ background: "white", padding: "24px", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", marginBottom: "24px" }}>
-          <h2 style={{ color: "#4f46e5", marginBottom: "16px" }}>{entity.name}</h2>
+        <div className="card">
+          <h2 className="card-title">
+            {form[entity.id] ? "Editar" : "Crear"} {entity.name.slice(0, -1)}
+          </h2>
 
-          <form onSubmit={handleSubmit} style={{ display: "grid", gap: "12px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+          <form onSubmit={handleSubmit} className="form-grid">
             {entity.fields.map(f => (
-              <div key={f}>
+              <div key={f} className="form-group">
+                <label className="form-label">
+                  {getLabel(f)}
+                </label>
                 <input
-                  placeholder={getLabel(f)}
                   type={f === "pPrecio" || f === "pStock" ? "number" : "text"}
                   step={f === "pPrecio" ? "0.01" : undefined}
                   value={form[f] || ""}
                   onChange={e => handleFieldChange(f, e.target.value)}
-                  style={{ 
-                    padding: "10px", 
-                    borderRadius: "8px", 
-                    border: errors[f] ? "2px solid #ef4444" : "1px solid #d1d5db",
-                    width: "100%"
-                  }}
+                  className={`form-input ${errors[f] ? 'error' : ''}`}
                   required={f !== "pEmail"}
                 />
                 {errors[f] && (
-                  <span style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
+                  <span className="error-message">
                     ⚠ {errors[f]}
                   </span>
                 )}
@@ -355,16 +340,14 @@ function App() {
             ))}
 
             {entity.select && (
-              <div>
+              <div className="form-group">
+                <label className="form-label">
+                  Ubicación
+                </label>
                 <select
                   value={form.uId || ""}
                   onChange={e => handleFieldChange("uId", e.target.value)}
-                  style={{ 
-                    padding: "10px", 
-                    borderRadius: "8px", 
-                    border: errors.uId ? "2px solid #ef4444" : "1px solid #d1d5db",
-                    width: "100%"
-                  }}
+                  className={`form-select ${errors.uId ? 'error' : ''}`}
                   required
                 >
                   <option value="">Seleccionar Ubicación</option>
@@ -375,7 +358,7 @@ function App() {
                   ))}
                 </select>
                 {errors.uId && (
-                  <span style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
+                  <span className="error-message">
                     ⚠ {errors.uId}
                   </span>
                 )}
@@ -384,43 +367,35 @@ function App() {
 
             {entity.venta && (
               <>
-                <div>
+                <div className="form-group">
+                  <label className="form-label">Cliente</label>
                   <select
                     value={form.pId || ""}
                     onChange={e => handleFieldChange("pId", e.target.value)}
-                    style={{ 
-                      padding: "10px", 
-                      borderRadius: "8px", 
-                      border: errors.pId ? "2px solid #ef4444" : "1px solid #d1d5db",
-                      width: "100%"
-                    }}
+                    className={`form-select ${errors.pId ? 'error' : ''}`}
                     required
                   >
-                    <option value="">Cliente</option>
+                    <option value="">Seleccionar Cliente</option>
                     {(data.personas || []).map(p => (
                       <option key={p.pId} value={p.pId}>{p.pNombre} {p.pApellido}</option>
                     ))}
                   </select>
                   {errors.pId && (
-                    <span style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
+                    <span className="error-message">
                       ⚠ {errors.pId}
                     </span>
                   )}
                 </div>
 
-                <div>
+                <div className="form-group">
+                  <label className="form-label">Punto de Venta</label>
                   <select
                     value={form.pvId || ""}
                     onChange={e => handleFieldChange("pvId", e.target.value)}
-                    style={{ 
-                      padding: "10px", 
-                      borderRadius: "8px", 
-                      border: errors.pvId ? "2px solid #ef4444" : "1px solid #d1d5db",
-                      width: "100%"
-                    }}
+                    className={`form-select ${errors.pvId ? 'error' : ''}`}
                     required
                   >
-                    <option value="">Punto de Venta</option>
+                    <option value="">Seleccionar Punto</option>
                     {(data["puntos-de-venta"] || []).map(pv => (
                       <option key={pv.pvId} value={pv.pvId}>
                         {pv.pvNombre} ({pv.ubicacion?.uNombre || "Sin ubicación"})
@@ -428,22 +403,24 @@ function App() {
                     ))}
                   </select>
                   {errors.pvId && (
-                    <span style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
+                    <span className="error-message">
                       ⚠ {errors.pvId}
                     </span>
                   )}
                 </div>
 
-                <div style={{ gridColumn: "1 / -1", marginTop: "16px" }}>
-                  <h4 style={{ marginBottom: "8px" }}>Productos</h4>
+                <div style={{ gridColumn: "1 / -1", marginTop: "20px" }}>
+                  <label className="form-label">
+                    Productos
+                  </label>
                   {errors.detalles && (
-                    <span style={{ color: "#ef4444", fontSize: "0.85rem", marginBottom: "8px", display: "block" }}>
+                    <span className="error-message" style={{ marginBottom: "12px" }}>
                       ⚠ {errors.detalles}
                     </span>
                   )}
                   {(form.detalles || []).map((d, i) => (
-                    <div key={i} style={{ marginBottom: "12px" }}>
-                      <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                    <div key={i} style={{ marginBottom: "16px" }}>
+                      <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
                         <div style={{ flex: 1 }}>
                           <select
                             value={d.pId || ""}
@@ -452,31 +429,25 @@ function App() {
                               newDetalles[i].pId = e.target.value;
                               setForm({ ...form, detalles: newDetalles });
                               
-                              // Limpiar error
                               const newErrors = { ...errors };
                               delete newErrors[`detalle_${i}_pId`];
                               delete newErrors.detalles;
                               setErrors(newErrors);
                             }}
-                            style={{ 
-                              width: "100%",
-                              padding: "8px", 
-                              borderRadius: "6px", 
-                              border: errors[`detalle_${i}_pId`] ? "2px solid #ef4444" : "1px solid #d1d5db" 
-                            }}
+                            className={`form-select ${errors[`detalle_${i}_pId`] ? 'error' : ''}`}
                           >
-                            <option value="">Producto</option>
+                            <option value="">Seleccionar Producto</option>
                             {(data.productos || []).map(p => (
                               <option key={p.pId} value={p.pId}>{p.pNombre} - ${p.pPrecio} (Stock: {p.pStock})</option>
                             ))}
                           </select>
                           {errors[`detalle_${i}_pId`] && (
-                            <span style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
+                            <span className="error-message">
                               ⚠ {errors[`detalle_${i}_pId`]}
                             </span>
                           )}
                         </div>
-                        <div style={{ width: "100px" }}>
+                        <div style={{ width: "120px" }}>
                           <input
                             type="number"
                             min="1"
@@ -487,20 +458,14 @@ function App() {
                               newDetalles[i].vdCantidad = parseInt(e.target.value) || 1;
                               setForm({ ...form, detalles: newDetalles });
                               
-                              // Limpiar error
                               const newErrors = { ...errors };
                               delete newErrors[`detalle_${i}_cantidad`];
                               setErrors(newErrors);
                             }}
-                            style={{ 
-                              width: "100%",
-                              padding: "8px", 
-                              borderRadius: "6px", 
-                              border: errors[`detalle_${i}_cantidad`] ? "2px solid #ef4444" : "1px solid #d1d5db" 
-                            }}
+                            className={`form-input ${errors[`detalle_${i}_cantidad`] ? 'error' : ''}`}
                           />
                           {errors[`detalle_${i}_cantidad`] && (
-                            <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block" }}>
+                            <span className="error-message" style={{ fontSize: "0.8rem" }}>
                               ⚠ {errors[`detalle_${i}_cantidad`]}
                             </span>
                           )}
@@ -511,7 +476,6 @@ function App() {
                             const newDetalles = (form.detalles || []).filter((_, idx) => idx !== i);
                             setForm({ ...form, detalles: newDetalles });
                             
-                            // Limpiar errores de este detalle
                             const newErrors = { ...errors };
                             delete newErrors[`detalle_${i}_pId`];
                             delete newErrors[`detalle_${i}_cantidad`];
@@ -520,7 +484,8 @@ function App() {
                             }
                             setErrors(newErrors);
                           }}
-                          style={{ background: "#ef4444", color: "white", padding: "8px 12px", borderRadius: "6px", minWidth: "40px" }}
+                          className="btn btn-danger"
+                          style={{ minWidth: "50px", padding: "16px" }}
                         >
                           ✕
                         </button>
@@ -531,12 +496,11 @@ function App() {
                     type="button"
                     onClick={() => {
                       setForm({ ...form, detalles: [...(form.detalles || []), { pId: "", vdCantidad: 1 }] });
-                      // Limpiar error de detalles vacíos
                       const newErrors = { ...errors };
                       delete newErrors.detalles;
                       setErrors(newErrors);
                     }}
-                    style={{ background: "#10b981", color: "white", padding: "8px 16px", borderRadius: "6px", fontWeight: "600" }}
+                    className="btn btn-secondary"
                   >
                     + Agregar Producto
                   </button>
@@ -546,103 +510,123 @@ function App() {
 
             <button
               type="submit"
+              className="btn btn-primary"
               style={{
                 gridColumn: entity.venta ? "1 / -1" : "auto",
-                background: "#4f46e5",
-                color: "white",
-                padding: "12px 24px",
-                borderRadius: "8px",
-                fontWeight: "600",
-                marginTop: "16px"
+                marginTop: "20px"
               }}
             >
-              {form[entity.id] ? "Actualizar" : "Crear"}
+              {form[entity.id] ? "✓ Actualizar" : "✓ Crear"}
             </button>
           </form>
         </div>
 
-        {/* TABLA */}
-        <div style={{ background: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ background: "#f3f4f6" }}>
-                <th style={{ border: "1px solid #e5e7eb", padding: "12px", textAlign: "left", fontWeight: "600" }}>ID</th>
-                {entity.fields.map(f => (
-                  <th key={f} style={{ border: "1px solid #e5e7eb", padding: "12px", textAlign: "left", fontWeight: "600" }}>
-                    {getLabel(f)}
-                  </th>
-                ))}
-                {entity.select && (
-                  <th style={{ border: "1px solid #e5e7eb", padding: "12px", textAlign: "left", fontWeight: "600" }}>
-                    Ubicación
-                  </th>
-                )}
-                {entity.venta && (
-                  <th style={{ border: "1px solid #e5e7eb", padding: "12px", textAlign: "left", fontWeight: "600" }}>
-                    Cliente / Punto de Venta
-                  </th>
-                )}
-                <th style={{ border: "1px solid #e5e7eb", padding: "12px", textAlign: "left", fontWeight: "600" }}>
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {getPaginated().map(item => (
-                <tr key={item[entity.id]}>
-                  <td style={{ border: "1px solid #e5e7eb", padding: "12px" }}>{item[entity.id]}</td>
+        <div className="card">
+          <h2 className="card-title">
+            Lista de {entity.name}
+          </h2>
+
+          <div className="table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
                   {entity.fields.map(f => (
-                    <td key={f} style={{ border: "1px solid #e5e7eb", padding: "12px" }}>
-                      {item[f] || "-"}
-                    </td>
+                    <th key={f}>
+                      {getLabel(f)}
+                    </th>
                   ))}
                   {entity.select && (
-                    <td style={{ border: "1px solid #e5e7eb", padding: "12px" }}>
-                      {item.ubicacion?.uNombre || "Sin ubicación"}
-                    </td>
+                    <th>
+                      Ubicación
+                    </th>
                   )}
                   {entity.venta && (
-                    <td style={{ border: "1px solid #e5e7eb", padding: "12px" }}>
-                      {data.personas?.find(p => p.pId === item.pId)?.pNombre || "—"} {data.personas?.find(p => p.pId === item.pId)?.pApellido || ""} /{" "}
-                      {data["puntos-de-venta"]?.find(pv => pv.pvId === item.pvId)?.pvNombre || "—"}
-                    </td>
+                    <th>
+                      Cliente / Punto de Venta
+                    </th>
                   )}
-                  <td style={{ border: "1px solid #e5e7eb", padding: "12px" }}>
-                    <button
-                      onClick={() => { setForm(item); setErrors({}); }}
-                      style={{ background: "#3b82f6", color: "white", padding: "6px 12px", borderRadius: "6px", marginRight: "6px" }}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => eliminar(activeTab, item[entity.id])}
-                      style={{ background: "#ef4444", color: "white", padding: "6px 12px", borderRadius: "6px" }}
-                    >
-                      Eliminar
-                    </button>
-                  </td>
+                  <th>
+                    Acciones
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div style={{ marginTop: "20px", textAlign: "center", display: "flex", justifyContent: "center", alignItems: "center", gap: "12px" }}>
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              style={{ padding: "8px 16px", borderRadius: "6px", background: page === 1 ? "#e5e7eb" : "#6b7280", color: "white" }}
-            >
-              Anterior
-            </button>
-            <span style={{ fontWeight: "600" }}>Página {page} de {totalPages}</span>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              style={{ padding: "8px 16px", borderRadius: "6px", background: page === totalPages ? "#e5e7eb" : "#6b7280", color: "white" }}
-            >
-              Siguiente
-            </button>
+              </thead>
+              <tbody>
+                {getPaginated().length > 0 ? (
+                  getPaginated().map(item => (
+                    <tr key={item[entity.id]}>
+                      <td className="table-id">{item[entity.id]}</td>
+                      {entity.fields.map(f => (
+                        <td key={f}>
+                          {item[f] || "-"}
+                        </td>
+                      ))}
+                      {entity.select && (
+                        <td>
+                          {item.ubicacion?.uNombre || "Sin ubicación"}
+                        </td>
+                      )}
+                      {entity.venta && (
+                        <td>
+                          <div style={{ fontWeight: "700" }}>
+                            {data.personas?.find(p => p.pId === item.pId)?.pNombre || "—"} {data.personas?.find(p => p.pId === item.pId)?.pApellido || ""}
+                          </div>
+                          <div style={{ fontSize: "0.9em", color: "#60a5fa", marginTop: "4px" }}>
+                            {data["puntos-de-venta"]?.find(pv => pv.pvId === item.pvId)?.pvNombre || "—"}
+                          </div>
+                        </td>
+                      )}
+                      <td>
+                        <button
+                          onClick={() => { setForm(item); setErrors({}); }}
+                          className="btn btn-edit"
+                          style={{ marginRight: "12px" }}
+                        >
+                          ✎ Editar
+                        </button>
+                        <button
+                          onClick={() => eliminar(activeTab, item[entity.id])}
+                          className="btn btn-danger"
+                        >
+                          ✕ Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="10" className="empty-state">
+                      No hay registros para mostrar
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="btn btn-secondary"
+                style={{ opacity: page === 1 ? 0.5 : 1 }}
+              >
+                ← Anterior
+              </button>
+              <span className="pagination-info">
+                Página {page} de {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="btn btn-secondary"
+                style={{ opacity: page === totalPages ? 0.5 : 1 }}
+              >
+                Siguiente →
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
