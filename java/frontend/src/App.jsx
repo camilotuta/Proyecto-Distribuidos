@@ -3,6 +3,20 @@ import axios from "axios";
 
 const API = "http://localhost:8080/api";
 
+const ENTITIES = [
+  { key: "personas", name: "Personas", id: "id", fields: ["nombre", "apellido", "email"] },
+  { key: "productos", name: "Productos", id: "id", fields: ["nombre", "precio", "stock"] },
+  { key: "ubicaciones", name: "Ubicaciones", id: "id", fields: ["nombre"] },
+  {
+    key: "puntos-de-venta",
+    name: "Puntos de Venta",
+    id: "id",
+    fields: ["nombre"],
+    select: { field: "uId", options: "ubicaciones", label: "nombre" }
+  },
+  { key: "ventas", name: "Ventas", id: "id", fields: ["vFecha"], venta: true }
+];
+
 function App() {
   const [activeTab, setActiveTab] = useState("personas");
   const [data, setData] = useState({});
@@ -11,19 +25,7 @@ function App() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  const entities = [
-    { key: "personas", name: "Personas", id: "pId", fields: ["nombre", "apellido", "email"] },
-    { key: "productos", name: "Productos", id: "pId", fields: ["nombre", "precio", "stock"] },
-    { key: "ubicaciones", name: "Ubicaciones", id: "uId", fields: ["nombre"] },
-    { 
-      key: "puntos-de-venta", 
-      name: "Puntos de Venta", 
-      id: "pvId", 
-      fields: ["nombre"], 
-      select: { field: "uId", options: "ubicaciones", label: "nombre" } 
-    },
-    { key: "ventas", name: "Ventas", id: "vId", fields: ["vFecha"], venta: true }
-  ];
+  const entities = ENTITIES;
 
   const FIELD_LABELS = {
     nombre: "Nombre",
@@ -43,9 +45,29 @@ function App() {
     }).format(value || 0);
   };
 
+  const formatDateValue = (fechaString) => {
+    if (!fechaString) return '-';
+    try {
+      let fecha;
+      if (Array.isArray(fechaString)) {
+        const [year, month, day, hour = 0, minute = 0, second = 0] = fechaString;
+        fecha = new Date(year, month - 1, day, hour, minute, second);
+      } else if (typeof fechaString === 'string' || typeof fechaString === 'number') {
+        fecha = new Date(fechaString);
+      } else if (fechaString instanceof Date) {
+        fecha = fechaString;
+      }
+
+      if (!fecha || isNaN(fecha.getTime())) return 'Fecha inválida';
+      return fecha.toLocaleString('es-CO');
+    } catch {
+      return 'Fecha inválida';
+    }
+  };
+
   useEffect(() => {
     const loadAll = async () => {
-      for (const e of entities) {
+      for (const e of ENTITIES) {
         try {
           const res = await axios.get(`${API}/${e.key}`);
           const dataList = Array.isArray(res.data) ? res.data : (res.data.content || []);
@@ -85,7 +107,7 @@ function App() {
     // MAPEO SEGÚN LA ENTIDAD
     if (ent === "personas") {
       payload = {
-        pId: form.pId,
+        pId: form.id,
         pNombre: form.nombre,
         pApellido: form.apellido,
         pEmail: form.email
@@ -93,7 +115,7 @@ function App() {
     }
     else if (ent === "productos") {
       payload = {
-        pId: form.pId,
+        pId: form.id,
         pNombre: form.nombre,
         pPrecio: form.precio,
         pStock: parseInt(form.stock) || 0
@@ -101,20 +123,20 @@ function App() {
     }
     else if (ent === "ubicaciones") {
       payload = {
-        uId: form.uId,
+        uId: form.id,
         uNombre: form.nombre
       };
     }
     else if (ent === "puntos-de-venta") {
       payload = {
-        pvId: form.pvId,
+        pvId: form.id,
         pvNombre: form.nombre,
         uId: form.uId
       };
     }
     else if (ent === "ventas") {
       payload = {
-        vId: form.vId,
+        vId: form.id,
         pId: form.pId,
         pvId: form.pvId,
         detalles: (form.detalles || []).map(d => ({
@@ -251,7 +273,7 @@ function App() {
                 >
                   <option value="">Seleccionar ubicación</option>
                   {(data[entity.select.options] || []).map(u => (
-                    <option key={u.uId} value={u.uId}>{u.nombre}</option>
+                    <option key={u.id} value={u.id}>{u.nombre}</option>
                   ))}
                 </select>
               </div>
@@ -269,7 +291,7 @@ function App() {
                   >
                     <option value="">Seleccionar cliente</option>
                     {(data.personas || []).map(p => (
-                      <option key={p.pId} value={p.pId}>
+                      <option key={p.id} value={p.id}>
                         {p.nombre} {p.apellido}
                       </option>
                     ))}
@@ -286,7 +308,7 @@ function App() {
                   >
                     <option value="">Seleccionar punto</option>
                     {(data["puntos-de-venta"] || []).map(pv => (
-                      <option key={pv.pvId} value={pv.pvId}>
+                      <option key={pv.id} value={pv.id}>
                         {pv.nombre} - {pv.ubicacionNombre}
                       </option>
                     ))}
@@ -310,7 +332,7 @@ function App() {
                       >
                         <option value="">Seleccionar producto</option>
                         {(data.productos || []).map(p => (
-                          <option key={p.pId} value={p.pId}>
+                          <option key={p.id} value={p.id}>
                             {p.nombre} - {formatMoney(p.precio)} (Stock: {p.stock})
                           </option>
                         ))}
@@ -403,7 +425,7 @@ function App() {
                     {entity.fields.map(f => (
                       <td key={f} style={{ padding: "16px", borderBottom: "1px solid #e5e7eb" }}>
                         {f === "vFecha"
-                          ? new Date(item[f]).toLocaleString('es-CO')
+                          ? formatDateValue(item[f] || item.fecha || item.vFecha || item.V_FECHA)
                           : f === "precio"
                             ? formatMoney(item[f])
                             : item[f] || "-"}

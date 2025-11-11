@@ -55,6 +55,14 @@ public class VentaServiceImpl implements VentaService {
                         ", Solicitado: " + detalle.getVdCantidad());
             }
 
+            // Si no se envió el precio unitario, tomar el precio actual del producto
+            if (detalle.getVdPrecioUnitario() == null) {
+                detalle.setVdPrecioUnitario(producto.getPPrecio());
+            }
+
+            // Establecer la referencia completa al producto (no solo el ID stub)
+            detalle.setProducto(producto);
+
             // Actualizar stock
             producto.setPStock(producto.getPStock() - detalle.getVdCantidad());
             productoRepository.save(producto);

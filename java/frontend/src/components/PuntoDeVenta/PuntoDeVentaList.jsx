@@ -1,33 +1,34 @@
 import { useState, useEffect } from 'react';
-import { getProductos, deleteProducto } from '../../services/productoService';
-import ProductoForm from './ProductoForm';
+import { getPuntosDeVenta, deletePuntoDeVenta } from '../../services/PuntoDeVentaService';
+import PuntoDeVentaForm from './PuntoDeVentaForm';
 
-export default function ProductoList() {
-  const [productos, setProductos] = useState([]);
+export default function PuntoDeVentaList() {
+  const [puntosDeVenta, setPuntosDeVenta] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
-    loadProductos();
+    loadPuntosDeVenta();
   }, []);
 
-  const loadProductos = async () => {
+  const loadPuntosDeVenta = async () => {
     try {
-      const res = await getProductos();
-      setProductos(res.data);
-    } catch (err) {
-      alert('Error al cargar productos');
+      const res = await getPuntosDeVenta();
+      setPuntosDeVenta(res.data);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al cargar puntos de venta');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (confirm('¿Eliminar este producto?')) {
+    if (confirm('¿Eliminar este punto de venta?')) {
       try {
-        await deleteProducto(id);
-        loadProductos();
+        await deletePuntoDeVenta(id);
+        loadPuntosDeVenta();
       } catch (err) {
         alert('Error al eliminar: ' + (err.response?.data?.error || err.message));
       }
@@ -42,7 +43,7 @@ export default function ProductoList() {
   const handleFormClose = () => {
     setShowForm(false);
     setEditingId(null);
-    loadProductos();
+    loadPuntosDeVenta();
   };
 
   if (loading) return <p>Cargando...</p>;
@@ -50,12 +51,12 @@ export default function ProductoList() {
   return (
     <div>
       <div style={{ marginBottom: '20px' }}>
-        <button onClick={() => setShowForm(true)}>Nuevo Producto</button>
+        <button onClick={() => setShowForm(true)}>Nuevo Punto de Venta</button>
       </div>
 
       {showForm && (
-        <ProductoForm
-          productoId={editingId}
+        <PuntoDeVentaForm
+          puntoDeVentaId={editingId}
           onSave={handleFormClose}
           onCancel={handleFormClose}
         />
@@ -66,23 +67,21 @@ export default function ProductoList() {
           <tr>
             <th>ID</th>
             <th>Nombre</th>
-            <th>Precio</th>
-            <th>Stock</th>
+            <th>Ubicación</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {productos.map(p => (
-            <tr key={p.pId}>
-              <td>{p.pId}</td>
-              <td>{p.pNombre}</td>
-              <td>${p.pPrecio?.toLocaleString()}</td>
-              <td>{p.pStock}</td>
+          {puntosDeVenta.map(pv => (
+            <tr key={pv.pvId}>
+              <td>{pv.pvId}</td>
+              <td>{pv.pvNombre}</td>
+              <td>{pv.ubicacionNombre || 'N/A'}</td>
               <td>
-                <button onClick={() => handleEdit(p.pId)} style={{ marginRight: '5px' }}>
+                <button onClick={() => handleEdit(pv.pvId)} style={{ marginRight: '5px' }}>
                   Editar
                 </button>
-                <button onClick={() => handleDelete(p.pId)} style={{ color: 'red' }}>
+                <button onClick={() => handleDelete(pv.pvId)} style={{ color: 'red' }}>
                   Eliminar
                 </button>
               </td>

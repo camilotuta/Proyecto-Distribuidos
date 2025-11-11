@@ -1,5 +1,6 @@
 package co.edu.tienda.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -11,18 +12,28 @@ public class Producto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "P_ID")
+    @JsonProperty("id")
+    @JsonAlias({"pId", "P_ID"})
     private Integer pId;
 
     @Column(name = "P_NOMBRE", nullable = false, length = 200)
+    @JsonProperty("nombre")
+    @JsonAlias({"pNombre", "P_NOMBRE"})
     private String pNombre;
 
     @Column(name = "P_DESCRIPCION", columnDefinition = "TEXT")
+    @JsonProperty("descripcion")
+    @JsonAlias({"pDescripcion", "P_DESCRIPCION"})
     private String pDescripcion;
 
     @Column(name = "P_PRECIO", nullable = false, precision = 10, scale = 2)
+    @JsonProperty("precio")
+    @JsonAlias({"pPrecio", "P_PRECIO"})
     private BigDecimal pPrecio;
 
     @Column(name = "P_STOCK", nullable = false)
+    @JsonProperty("stock")
+    @JsonAlias({"pStock", "P_STOCK"})
     private Integer pStock;
 
     public Producto() {}
@@ -34,7 +45,7 @@ public class Producto {
         this.pStock = pStock;
     }
 
-    // GETTERS REALES
+    // GETTERS Y SETTERS
     public Integer getPId() { return pId; }
     public void setPId(Integer pId) { this.pId = pId; }
 
@@ -49,32 +60,6 @@ public class Producto {
 
     public Integer getPStock() { return pStock; }
     public void setPStock(Integer pStock) { this.pStock = pStock; }
-
-    // GETTERS VIRTUALES (para mostrar)
-    @JsonProperty("nombre")
-    public String getNombre() { return pNombre; }
-
-    @JsonProperty("descripcion")
-    public String getDescripcion() { return pDescripcion; }
-
-    @JsonProperty("precio")
-    public BigDecimal getPrecio() { return pPrecio; }
-
-    @JsonProperty("stock")
-    public Integer getStock() { return pStock; }
-
-    // SETTERS VIRTUALES (para recibir del frontend)
-    @JsonProperty("nombre")
-    public void setNombre(String nombre) { this.pNombre = nombre; }
-
-    @JsonProperty("descripcion")
-    public void setDescripcion(String descripcion) { this.pDescripcion = descripcion; }
-
-    @JsonProperty("precio")
-    public void setPrecio(BigDecimal precio) { this.pPrecio = precio; }
-
-    @JsonProperty("stock")
-    public void setStock(Integer stock) { this.pStock = stock; }
 
     @Override
     public String toString() {

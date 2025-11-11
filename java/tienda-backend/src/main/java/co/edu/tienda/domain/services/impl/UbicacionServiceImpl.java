@@ -31,6 +31,9 @@ public class UbicacionServiceImpl implements UbicacionService {
 
     @Override
     public Ubicacion guardar(Ubicacion ubicacion) {
+        if (ubicacion.getUNombre() == null || ubicacion.getUNombre().trim().isEmpty()) {
+            throw new RuntimeException("El nombre de la ubicación es obligatorio");
+        }
         return ubicacionRepository.save(ubicacion);
     }
 
@@ -38,8 +41,9 @@ public class UbicacionServiceImpl implements UbicacionService {
     public Ubicacion actualizar(Integer id, Ubicacion ubicacion) {
         Ubicacion ubicacionExistente = ubicacionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ubicación no encontrada con ID: " + id));
-
-        ubicacionExistente.setUNombre(ubicacion.getUNombre());
+        if (ubicacion.getUNombre() != null && !ubicacion.getUNombre().trim().isEmpty()) {
+            ubicacionExistente.setUNombre(ubicacion.getUNombre());
+        }
 
         return ubicacionRepository.save(ubicacionExistente);
     }

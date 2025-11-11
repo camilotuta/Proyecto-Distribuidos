@@ -1,5 +1,6 @@
 package co.edu.tienda.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
@@ -10,9 +11,13 @@ public class PuntoDeVenta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PV_ID")
+    @JsonProperty("id")
+    @JsonAlias({"pvId", "PV_ID"})
     private Integer pvId;
 
     @Column(name = "PV_NOMBRE", nullable = false, length = 200)
+    @JsonProperty("nombre")
+    @JsonAlias({"pvNombre", "PV_NOMBRE"})
     private String pvNombre;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -35,11 +40,9 @@ public class PuntoDeVenta {
     public Ubicacion getUbicacion() { return ubicacion; }
     public void setUbicacion(Ubicacion ubicacion) { this.ubicacion = ubicacion; }
 
-    // GETTERS VIRTUALES
-    @JsonProperty("nombre")
-    public String getNombre() { return pvNombre; }
-
+    // GETTERS VIRTUALES ADICIONALES
     @JsonProperty("uId")
+    @JsonAlias({"ubicacionId"})
     public Integer getUId() { 
         return ubicacion != null ? ubicacion.getUId() : null; 
     }
@@ -49,11 +52,9 @@ public class PuntoDeVenta {
         return ubicacion != null ? ubicacion.getUNombre() : null; 
     }
 
-    // SETTERS VIRTUALES
-    @JsonProperty("nombre")
-    public void setNombre(String nombre) { this.pvNombre = nombre; }
-
+    // SETTER VIRTUAL PARA uId
     @JsonProperty("uId")
+    @JsonAlias({"ubicacionId"})
     public void setUId(Integer uId) {
         if (uId != null) {
             this.ubicacion = new Ubicacion();

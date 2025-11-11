@@ -1,5 +1,6 @@
 package co.edu.tienda.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -12,6 +13,8 @@ public class VentaDetalle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "VD_ID")
+    @JsonProperty("id")
+    @JsonAlias({"vdId", "VD_ID"})
     private Integer vdId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -24,9 +27,13 @@ public class VentaDetalle {
     private Producto producto;
 
     @Column(name = "VD_CANTIDAD", nullable = false)
+    @JsonProperty("cantidad")
+    @JsonAlias({"vdCantidad", "VD_CANTIDAD"})
     private Integer vdCantidad;
 
     @Column(name = "VD_PRECIO_UNITARIO", nullable = false, precision = 10, scale = 2)
+    @JsonProperty("precioUnitario")
+    @JsonAlias({"vdPrecioUnitario", "VD_PRECIO_UNITARIO"})
     private BigDecimal vdPrecioUnitario;
 
     // Constructor vacío
@@ -85,6 +92,7 @@ public class VentaDetalle {
     // ==================== GETTERS VIRTUALES PARA JSON ====================
     
     @JsonProperty("pId")
+    @JsonAlias({"productoId"})
     public Integer getPId() {
         return producto != null ? producto.getPId() : null;
     }
@@ -97,6 +105,17 @@ public class VentaDetalle {
     @JsonProperty("subtotal")
     public BigDecimal getSubtotal() {
         return calcularSubtotal();
+    }
+
+    // ==================== SETTERS VIRTUALES PARA JSON ====================
+    
+    @JsonProperty("pId")
+    @JsonAlias({"productoId"})
+    public void setPId(Integer pId) {
+        if (pId != null) {
+            this.producto = new Producto();
+            this.producto.setPId(pId);
+        }
     }
 
     // Método para calcular subtotal

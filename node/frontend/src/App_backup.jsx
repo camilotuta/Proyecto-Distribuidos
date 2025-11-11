@@ -42,7 +42,6 @@ function App() {
       }
     };
     loadAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -52,7 +51,6 @@ function App() {
         setData(prev => ({ ...prev, [activeTab]: res.data }));
         setPage(1);
         setSearch("");
-        setErrors({});
       } catch (err) {
         console.error(`Error recargando ${activeTab}:`, err.response?.data || err.message);
       }
@@ -61,7 +59,7 @@ function App() {
   }, [activeTab]);
 
   // ========== VALIDACIONES ==========
-  const validateField = (fieldName, value) => {
+  const validateField = (fieldName, value, allFormData = {}) => {
     if (!value || value.toString().trim() === "") {
       return "Este campo es obligatorio";
     }
@@ -71,7 +69,7 @@ function App() {
       case "pNombre":
       case "pApellido":
       case "uNombre":
-      case "pvNombre": {
+      case "pvNombre":
         if (value.length < 2) {
           return "Debe tener al menos 2 caracteres";
         }
@@ -82,10 +80,9 @@ function App() {
           return "Solo se permiten letras y espacios";
         }
         break;
-      }
 
       // VALIDACIÓN DE EMAIL
-      case "pEmail": {
+      case "pEmail":
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) {
           return "Formato de email inválido (ej: usuario@dominio.com)";
@@ -94,10 +91,9 @@ function App() {
           return "El email no puede exceder 100 caracteres";
         }
         break;
-      }
 
       // VALIDACIÓN DE PRECIO
-      case "pPrecio": {
+      case "pPrecio":
         const precio = parseFloat(value);
         if (isNaN(precio)) {
           return "Debe ser un número válido";
@@ -112,10 +108,9 @@ function App() {
           return "Formato inválido (máximo 2 decimales)";
         }
         break;
-      }
 
       // VALIDACIÓN DE STOCK
-      case "pStock": {
+      case "pStock":
         const stock = parseInt(value);
         if (isNaN(stock)) {
           return "Debe ser un número entero";
@@ -130,7 +125,6 @@ function App() {
           return "Debe ser un número entero sin decimales";
         }
         break;
-      }
 
       // VALIDACIÓN DE SELECTS (ubicación para puntos de venta)
       case "uId":
@@ -165,7 +159,7 @@ function App() {
 
     // Validar campos normales
     entity.fields.forEach(field => {
-      const error = validateField(field, formData[field]);
+      const error = validateField(field, formData[field], formData);
       if (error) {
         newErrors[field] = error;
       }
@@ -173,7 +167,7 @@ function App() {
 
     // Validar select (ubicación para puntos de venta)
     if (entity.select && entityKey === "puntos-de-venta") {
-      const error = validateField("uId", formData.uId);
+      const error = validateField("uId", formData.uId, formData);
       if (error) {
         newErrors.uId = error;
       }
@@ -181,10 +175,10 @@ function App() {
 
     // Validar ventas
     if (entity.venta) {
-      const pIdError = validateField("pId", formData.pId);
+      const pIdError = validateField("pId", formData.pId, formData);
       if (pIdError) newErrors.pId = pIdError;
 
-      const pvIdError = validateField("pvId", formData.pvId);
+      const pvIdError = validateField("pvId", formData.pvId, formData);
       if (pvIdError) newErrors.pvId = pvIdError;
 
       if (!formData.detalles || formData.detalles.length === 0) {
@@ -215,7 +209,7 @@ function App() {
     setForm({ ...form, [fieldName]: value });
     
     // Validar el campo en tiempo real
-    const error = validateField(fieldName, value);
+    const error = validateField(fieldName, value, { ...form, [fieldName]: value });
     setErrors(prev => ({
       ...prev,
       [fieldName]: error
@@ -285,14 +279,14 @@ function App() {
     <div style={{ padding: "20px", fontFamily: "Arial", background: "#f9fafb", minHeight: "100vh" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
         <h1 style={{ color: "#4f46e5", textAlign: "center", marginBottom: "24px", fontSize: "2rem" }}>
-          Sistema de Ventas - Con Validaciones
+          Sistema de Ventas - 100% FUNCIONAL
         </h1>
 
         <div style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap", justifyContent: "center" }}>
           {entities.map(e => (
             <button
               key={e.key}
-              onClick={() => { setActiveTab(e.key); setForm({}); setErrors({}); }}
+              onClick={() => { setActiveTab(e.key); setForm({}); }}
               style={{
                 padding: "10px 16px",
                 background: activeTab === e.key ? "#4f46e5" : "#e5e7eb",
@@ -320,9 +314,7 @@ function App() {
             marginBottom: "20px",
             borderRadius: "8px",
             border: "1px solid #d1d5db",
-            fontSize: "1rem",
-            display: "block",
-            margin: "0 auto 20px"
+            fontSize: "1rem"
           }}
         />
 
@@ -348,7 +340,7 @@ function App() {
                 />
                 {errors[f] && (
                   <span style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
-                    ⚠ {errors[f]}
+                    {errors[f]}
                   </span>
                 )}
               </div>
@@ -376,7 +368,7 @@ function App() {
                 </select>
                 {errors.uId && (
                   <span style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
-                    ⚠ {errors.uId}
+                    {errors.uId}
                   </span>
                 )}
               </div>
@@ -403,7 +395,7 @@ function App() {
                   </select>
                   {errors.pId && (
                     <span style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
-                      ⚠ {errors.pId}
+                      {errors.pId}
                     </span>
                   )}
                 </div>
@@ -429,7 +421,7 @@ function App() {
                   </select>
                   {errors.pvId && (
                     <span style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
-                      ⚠ {errors.pvId}
+                      {errors.pvId}
                     </span>
                   )}
                 </div>
@@ -438,7 +430,7 @@ function App() {
                   <h4 style={{ marginBottom: "8px" }}>Productos</h4>
                   {errors.detalles && (
                     <span style={{ color: "#ef4444", fontSize: "0.85rem", marginBottom: "8px", display: "block" }}>
-                      ⚠ {errors.detalles}
+                      {errors.detalles}
                     </span>
                   )}
                   {(form.detalles || []).map((d, i) => (
@@ -455,7 +447,6 @@ function App() {
                               // Limpiar error
                               const newErrors = { ...errors };
                               delete newErrors[`detalle_${i}_pId`];
-                              delete newErrors.detalles;
                               setErrors(newErrors);
                             }}
                             style={{ 
@@ -472,7 +463,7 @@ function App() {
                           </select>
                           {errors[`detalle_${i}_pId`] && (
                             <span style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
-                              ⚠ {errors[`detalle_${i}_pId`]}
+                              {errors[`detalle_${i}_pId`]}
                             </span>
                           )}
                         </div>
@@ -501,7 +492,7 @@ function App() {
                           />
                           {errors[`detalle_${i}_cantidad`] && (
                             <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block" }}>
-                              ⚠ {errors[`detalle_${i}_cantidad`]}
+                              {errors[`detalle_${i}_cantidad`]}
                             </span>
                           )}
                         </div>
@@ -515,28 +506,45 @@ function App() {
                             const newErrors = { ...errors };
                             delete newErrors[`detalle_${i}_pId`];
                             delete newErrors[`detalle_${i}_cantidad`];
-                            if (newDetalles.length > 0) {
-                              delete newErrors.detalles;
-                            }
                             setErrors(newErrors);
                           }}
                           style={{ background: "#ef4444", color: "white", padding: "8px 12px", borderRadius: "6px", minWidth: "40px" }}
                         >
-                          ✕
+                          X
                         </button>
                       </div>
                     </div>
                   ))}
+                        ))}
+                      </select>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Cant."
+                        value={d.vdCantidad || ""}
+                        onChange={e => {
+                          const newDetalles = [...(form.detalles || [])];
+                          newDetalles[i].vdCantidad = parseInt(e.target.value) || 1;
+                          setForm({ ...form, detalles: newDetalles });
+                        }}
+                        style={{ width: "80px", padding: "8px", borderRadius: "6px", border: "1px solid #d1d5db" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newDetalles = (form.detalles || []).filter((_, idx) => idx !== i);
+                          setForm({ ...form, detalles: newDetalles });
+                        }}
+                        style={{ background: "#ef4444", color: "white", padding: "8px", borderRadius: "6px" }}
+                      >
+                        X
+                      </button>
+                    </div>
+                  ))}
                   <button
                     type="button"
-                    onClick={() => {
-                      setForm({ ...form, detalles: [...(form.detalles || []), { pId: "", vdCantidad: 1 }] });
-                      // Limpiar error de detalles vacíos
-                      const newErrors = { ...errors };
-                      delete newErrors.detalles;
-                      setErrors(newErrors);
-                    }}
-                    style={{ background: "#10b981", color: "white", padding: "8px 16px", borderRadius: "6px", fontWeight: "600" }}
+                    onClick={() => setForm({ ...form, detalles: [...(form.detalles || []), { pId: "", vdCantidad: 1 }] })}
+                    style={{ background: "#10b981", color: "white", padding: "8px 16px", borderRadius: "6px" }}
                   >
                     + Agregar Producto
                   </button>
@@ -609,7 +617,7 @@ function App() {
                   )}
                   <td style={{ border: "1px solid #e5e7eb", padding: "12px" }}>
                     <button
-                      onClick={() => { setForm(item); setErrors({}); }}
+                      onClick={() => setForm(item)}
                       style={{ background: "#3b82f6", color: "white", padding: "6px 12px", borderRadius: "6px", marginRight: "6px" }}
                     >
                       Editar

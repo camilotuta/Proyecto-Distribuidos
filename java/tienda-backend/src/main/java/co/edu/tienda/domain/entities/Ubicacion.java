@@ -1,5 +1,6 @@
 package co.edu.tienda.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
@@ -10,9 +11,13 @@ public class Ubicacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "U_ID")
+    @JsonProperty("id")
+    @JsonAlias({"uId", "U_ID"})
     private Integer uId;
 
     @Column(name = "U_NOMBRE", nullable = false, length = 200)
+    @JsonProperty("nombre")
+    @JsonAlias({"uNombre", "U_NOMBRE"})
     private String uNombre;
 
     public Ubicacion() {}
@@ -26,13 +31,6 @@ public class Ubicacion {
 
     public String getUNombre() { return uNombre; }
     public void setUNombre(String uNombre) { this.uNombre = uNombre; }
-
-    // GETTER Y SETTER VIRTUAL
-    @JsonProperty("nombre")
-    public String getNombre() { return uNombre; }
-
-    @JsonProperty("nombre")
-    public void setNombre(String nombre) { this.uNombre = nombre; }
 
     @Override
     public String toString() {

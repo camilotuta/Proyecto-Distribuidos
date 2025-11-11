@@ -31,13 +31,23 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public Producto guardar(Producto producto) {
-        // Validaciones
+        // Validaciones básicas
+        if (producto.getPNombre() == null || producto.getPNombre().trim().isEmpty()) {
+            throw new RuntimeException("El nombre del producto es obligatorio");
+        }
+        if (producto.getPPrecio() == null) {
+            throw new RuntimeException("El precio es obligatorio");
+        }
         if (producto.getPPrecio().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("El precio no puede ser negativo");
+        }
+        if (producto.getPStock() == null) {
+            throw new RuntimeException("El stock es obligatorio");
         }
         if (producto.getPStock() < 0) {
             throw new RuntimeException("El stock no puede ser negativo");
         }
+
         return productoRepository.save(producto);
     }
 
@@ -45,11 +55,25 @@ public class ProductoServiceImpl implements ProductoService {
     public Producto actualizar(Integer id, Producto producto) {
         Producto productoExistente = productoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
-
-        productoExistente.setPNombre(producto.getPNombre());
-        productoExistente.setPDescripcion(producto.getPDescripcion());
-        productoExistente.setPPrecio(producto.getPPrecio());
-        productoExistente.setPStock(producto.getPStock());
+        // Actualizar solo campos no nulos
+        if (producto.getPNombre() != null && !producto.getPNombre().trim().isEmpty()) {
+            productoExistente.setPNombre(producto.getPNombre());
+        }
+        if (producto.getPDescripcion() != null) {
+            productoExistente.setPDescripcion(producto.getPDescripcion());
+        }
+        if (producto.getPPrecio() != null) {
+            if (producto.getPPrecio().compareTo(BigDecimal.ZERO) < 0) {
+                throw new RuntimeException("El precio no puede ser negativo");
+            }
+            productoExistente.setPPrecio(producto.getPPrecio());
+        }
+        if (producto.getPStock() != null) {
+            if (producto.getPStock() < 0) {
+                throw new RuntimeException("El stock no puede ser negativo");
+            }
+            productoExistente.setPStock(producto.getPStock());
+        }
 
         return productoRepository.save(productoExistente);
     }
